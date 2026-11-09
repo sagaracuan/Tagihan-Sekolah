@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Tagihan Anak-anak</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f6f7f4;--card:#fff;--tx:#1d2420;--mu:#5f6b64;--ln:#e3e7e1;--pr:#1f7a5c;--prt:#fff;--ok:#1f7a5c;--okb:#e2f3ec;--wa:#a35f00;--wab:#fff1d6;--er:#b3261e;--erb:#fde7e5;--bl:#e9ecf0;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#121613;--card:#1b211d;--tx:#eef2ee;--mu:#9aa89f;--ln:#2b342d;--pr:#4fc79b;--prt:#06231a;--ok:#5fd4a8;--okb:#17372b;--wa:#f0b35a;--wab:#3b2d12;--er:#ff8f86;--erb:#40201d;--bl:#252c27}}
+:root[data-theme="dark"]{--bg:#121613;--card:#1b211d;--tx:#eef2ee;--mu:#9aa89f;--ln:#2b342d;--pr:#4fc79b;--prt:#06231a;--ok:#5fd4a8;--okb:#17372b;--wa:#f0b35a;--wab:#3b2d12;--er:#ff8f86;--erb:#40201d;--bl:#252c27}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.6 'Plus Jakarta Sans',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;-webkit-text-size-adjust:100%}
+main{max-width:640px;margin:0 auto;padding:16px 16px 90px}
+h1{font-size:22px;margin:8px 0 2px;letter-spacing:-.2px}
+.sub{color:var(--mu);font-size:14px;margin:0 0 14px}
+.card{background:var(--card);border:1px solid var(--ln);border-radius:16px;padding:14px;margin-bottom:12px}
+.row{display:flex;align-items:center;gap:10px}.sp{justify-content:space-between}
+button,.btn{font:inherit;font-weight:600;font-size:14px;border:1px solid var(--ln);background:var(--card);color:var(--tx);border-radius:12px;padding:9px 13px;cursor:pointer;text-decoration:none;display:inline-block;line-height:1.3}
+.pri{background:var(--pr);color:var(--prt);border-color:var(--pr)}
+.sm{padding:6px 10px;font-size:13px}
+.mon{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.mon b{font-size:17px}
+.sum{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.sum div{border-radius:16px;padding:12px 14px}
+.sum small{display:block;color:var(--mu);font-size:13px}.sum strong{font-size:19px}
+.s1{background:var(--wab)}.s2{background:var(--okb)}
+nav{position:fixed;left:0;right:0;bottom:0;background:var(--card);border-top:1px solid var(--ln);display:flex;padding:8px 8px calc(8px + env(safe-area-inset-bottom,0px));z-index:5}
+nav button{flex:1;border:0;background:none;color:var(--mu);font-size:12px;padding:6px 2px}
+nav button.on{color:var(--pr)}
+.kid{font-weight:700;font-size:15px;margin:16px 2px 8px}
+.it{padding:12px 0;border-top:1px solid var(--ln)}.it:first-child{border-top:0}
+.nm{font-weight:600}.mu{color:var(--mu);font-size:13px}
+.chip{font-size:12px;font-weight:700;padding:3px 9px;border-radius:99px;background:var(--bl);white-space:nowrap}
+.c-ok{background:var(--okb);color:var(--ok)}.c-wa{background:var(--wab);color:var(--wa)}.c-er{background:var(--erb);color:var(--er)}
+.det{background:var(--bg);border-radius:12px;padding:10px 12px;margin-top:8px;font-size:14px}
+.det .row{padding:3px 0}.det img{max-width:220px;width:100%;border-radius:10px;margin-top:6px}
+label{display:block;font-size:13px;color:var(--mu);margin:10px 0 3px}
+input,select{font:inherit;width:100%;padding:10px 12px;border-radius:12px;border:1px solid var(--ln);background:var(--card);color:var(--tx)}
+dialog{border:0;border-radius:18px;padding:18px;width:min(92vw,440px);background:var(--card);color:var(--tx);max-height:88vh;overflow:auto}
+dialog::backdrop{background:rgba(0,0,0,.45)}
+.grow{flex:1;min-width:0}.right{text-align:right}
+.hide{display:none}
+.note{font-size:13px;color:var(--mu)}
+</style>
+</head>
+<body>
+<main>
+<h1>Tagihan Anak-anak</h1>
+<p class="sub">Catat, ingatkan, dan lunasi tanpa lupa.</p>
+<section id="v-tag"></section>
+<section id="v-rek" class="hide"></section>
+<section id="v-one" class="hide"></section>
+<section id="v-rkp" class="hide"></section>
+<section id="v-ing" class="hide"></section>
+</main>
+<nav>
+<button data-t="tag" class="on">Bulanan</button>
+<button data-t="one">Sekali</button>
+<button data-t="rkp">Rekap</button>
+<button data-t="rek">Rekening</button>
+<button data-t="ing">Pengingat</button>
+</nav>
+<dialog id="dlg"></dialog>
+<script>
+const K='tagihan-anak-v1';
+const dflt={kids:['Anak 1','Anak 2','Anak 3'],
+payees:[
+{id:'sek',name:'Sekolah',bank:'',rek:'',an:'',va:'',wa:'',qris:''},
+{id:'bim',name:'Bimbel',bank:'',rek:'',an:'',va:'',wa:'',qris:''},
+{id:'lia',name:'Bu Lia (guru sekolah)',bank:'',rek:'',an:'',va:'',wa:'',qris:''},
+{id:'bol',name:'Sekolah Bola',bank:'',rek:'',an:'',va:'',wa:'',qris:''},
+{id:'ngj',name:'Guru Ngaji',bank:'',rek:'',an:'',va:'',wa:'',qris:''},
+{id:'pri',name:'Guru Les Privat (anak 2)',bank:'',rek:'',an:'',va:'',wa:'',qris:''}],
+items:[
+{id:'a1',kid:0,name:'SPP',amt:175000,day:10,pay:'sek'},
+{id:'a2',kid:0,name:'Les Bu Lia',amt:100000,day:10,pay:'lia'},
+{id:'a3',kid:0,name:'Sekolah bola',amt:100000,day:3,pay:'bol'},
+{id:'a4',kid:0,name:'Bimbel',amt:80000,day:7,pay:'bim'},
+{id:'a5',kid:0,name:'Ngaji',amt:50000,day:10,pay:'ngj'},
+{id:'b1',kid:1,name:'SPP',amt:175000,day:10,pay:'sek'},
+{id:'b2',kid:1,name:'Les privat',amt:80000,day:10,pay:'pri'},
+{id:'b3',kid:1,name:'Ngaji',amt:50000,day:10,pay:'ngj'},
+{id:'c1',kid:2,name:'SPP (isi nominal)',amt:0,day:10,pay:'sek'},
+{id:'c2',kid:2,name:'Bimbel',amt:150000,day:7,pay:'bim'}],
+paid:{}};
+let S;
+try{S=JSON.parse(localStorage.getItem(K))}catch(e){}
+if(!S||!S.items)S=JSON.parse(JSON.stringify(dflt));
+if(!S.payees.find(p=>p.id==='kor'))S.payees.push({id:'kor',name:'Korlas (bayar cash)',bank:'',rek:'',an:'',va:'',wa:'',qris:''});
+if(!S.once){S.once=[];[0,1,2].forEach(k=>{S.once.push({id:'o-sp'+k,kid:k,name:'Sumbangan pembangunan',amt:200000,due:'2026-11-30',pay:'kor',paid:''},{id:'o-es'+k,kid:k,name:'Eskul tahunan',amt:300000,due:'2027-06-30',pay:'sek',paid:''})})}
+const save=()=>{try{localStorage.setItem(K,JSON.stringify(S))}catch(e){}};
+if(!S.m3){S.m3=1;const fill={sek:{bank:'BJB',rek:'0096255535101',an:'Ibu Vivit'},bol:{bank:'BCA',an:'Rifqi Sehan Al Farez'},lia:{bank:'BSI',rek:'7333657567'},bim:{bank:'BCA',rek:'7005763843',an:'Ulfa Sofian Hadi'},ngj:{bank:'BSI',rek:'6155241650',an:'Robingah'}};Object.keys(fill).forEach(id=>{const p=S.payees.find(x=>x.id===id);if(p)Object.assign(p,fill[id])});save()}
+if(!S.m4){S.m4=1;S.kids=['Keenan','Kaiana','Kalla'];const f4={bol:{rek:'7006154521'},lia:{an:'Lia Lian Andriyani'}};Object.keys(f4).forEach(id=>{const p=S.payees.find(x=>x.id===id);if(p)Object.assign(p,f4[id])});const b2=S.items.find(x=>x.id==='b2');if(b2)b2.pay='lia';S.payees=S.payees.filter(p=>p.id!=='pri'||S.items.some(i=>i.pay==='pri'));save()}
+if(!S.start){const n0=new Date();S.start=n0.getFullYear()*12+n0.getMonth();save()}
+if(!S.m2){S.m2=1;if(!S.payees.find(p=>p.id==='pomg'))S.payees.push({id:'pomg',name:'POMG (komite orang tua)',bank:'',rek:'',an:'',va:'',wa:'',qris:''});[0,1,2].forEach(k=>S.once.push({id:'o-pm'+k,kid:k,name:'Iuran POMG',amt:200000,due:'2027-06-30',pay:'pomg',paid:''}));save()}
+const $=s=>document.querySelector(s);
+const rp=n=>'Rp'+Number(n||0).toLocaleString('id-ID');
+const BL=['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+const now=new Date();let Y=now.getFullYear(),M=now.getMonth();
+const pk=i=>`${Y}-${M}:${i.id}`;
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const payee=id=>S.payees.find(p=>p.id===id)||{name:'-'};
+function dueOf(i){const last=new Date(Y,M+1,0).getDate();return new Date(Y,M,Math.min(i.day,last))}
+const fdt=d=>d.toLocaleDateString('id-ID',{day:'numeric',month:'long',year:'numeric'});
+function status(i){
+ if(S.paid[pk(i)])return['Lunas','c-ok'];
+ const t=new Date(now.getFullYear(),now.getMonth(),now.getDate());
+ const d=Math.round((dueOf(i)-t)/864e5);
+ if(d<0)return['Terlambat '+(-d)+' hari','c-er'];
+ if(d===0)return['Hari ini!','c-er'];
+ if(d<=2)return['H-'+d,'c-wa'];
+ return['Belum','']}
+function copy(t){try{navigator.clipboard.writeText(t).then(()=>toast('Disalin'),()=>fb(t))}catch(e){fb(t)}}
+function fb(t){const a=document.createElement('textarea');a.value=t;document.body.appendChild(a);a.select();try{document.execCommand('copy');toast('Disalin')}catch(e){}a.remove()}
+function toast(m){const e=document.createElement('div');e.textContent=m;e.style.cssText='position:fixed;left:50%;transform:translateX(-50%);bottom:80px;background:var(--tx);color:var(--bg);padding:8px 16px;border-radius:99px;font-size:14px;z-index:20';document.body.appendChild(e);setTimeout(()=>e.remove(),1400)}
+let open={};
+function payInfo(p,msg){
+ let h='';
+ if(p.bank||p.rek)h+=`<div class="row sp"><span>${esc(p.bank)} <b>${esc(p.rek)}</b><br><span class="mu">a.n. ${esc(p.an)}</span></span>${p.rek?`<button class="sm" data-cp="${esc(p.rek)}">Salin</button>`:''}</div>`;
+ if(p.va)h+=`<div class="row sp"><span>VA <b>${esc(p.va)}</b></span><button class="sm" data-cp="${esc(p.va)}">Salin</button></div>`;
+ if(p.wa||msg)h+=`<div class="row sp"><span>${p.wa?'WA '+esc(p.wa):'Kabari guru'}</span><a class="btn sm" target="_blank" rel="noopener" href="https://wa.me/${(p.wa||'').replace(/\D/g,'').replace(/^0/,'62')}${msg?'?text='+encodeURIComponent(msg):''}">${msg?'Konfirmasi lewat WA':'Chat'}</a></div>`;
+ if(p.qris)h+=`<div>QRIS<br><img src="${p.qris}" alt="QRIS ${esc(p.name)}"></div>`;
+ return h||(p.id==='kor'?'<span class="mu">Bayar tunai langsung ke korlas.</span>':'<span class="mu">Rekening belum diisi. Buka tab Rekening.</span>')}
+function renderTag(){
+ const its=S.items;let bel=0,lun=0;
+ its.forEach(i=>{S.paid[pk(i)]?lun+=+i.amt:bel+=+i.amt});
+ let h=`<div class="mon"><button class="sm" id="pv">‹</button><b>${BL[M]} ${Y}</b><button class="sm" id="nx">›</button></div>
+<div class="sum"><div class="s1"><small>Belum dibayar</small><strong>${rp(bel)}</strong></div><div class="s2"><small>Sudah lunas</small><strong>${rp(lun)}</strong></div></div>
+<div class="row" style="margin-bottom:6px"><a class="btn pri grow" id="wa" target="_blank" rel="noopener" style="text-align:center">Kirim tagihan ke WA suami</a></div><button id="mt1" style="width:100%;margin-bottom:6px">Lunaskan otomatis dari bukti transfer</button>`;
+ S.kids.forEach((k,ki)=>{
+  const l=its.filter(i=>i.kid===ki).sort((a,b)=>a.day-b.day);
+  h+=`<div class="kid">${esc(k)}</div><div class="card" style="padding:4px 14px">`;
+  l.forEach(i=>{const [st,cl]=status(i),p=payee(i.pay),pd=S.paid[pk(i)];
+   h+=`<div class="it"><div class="row sp"><div class="grow"><div class="nm">${esc(i.name)}</div><div class="mu">${esc(p.name)} · jatuh tempo ${fdt(dueOf(i))}${pd?' · dibayar '+esc(pd):''}</div></div><div class="right"><div class="nm">${rp(i.amt)}</div><span class="chip ${cl}">${st}</span></div></div>
+   <div class="row" style="margin-top:8px"><button class="sm ${pd?'':'pri'}" data-pay="${i.id}">${pd?'Batalkan lunas':'Tandai lunas'}</button><button class="sm" data-inf="${i.id}">Cara bayar</button><button class="sm" data-ed="${i.id}">Edit</button></div>
+   ${open[i.id]?`<div class="det">${payInfo(p,p.id==='kor'?'':`Assalamualaikum Bu/Pak, mau konfirmasi ya, ${i.name} ${S.kids[i.kid]} bulan ${BL[M]} ${Y} sebesar ${rp(i.amt)} sudah ditransfer. Mohon dicek ya 🙏 Terima kasih.`)}</div>`:''}</div>`});
+  h+=`</div>`});
+ h+=`<button id="add" class="pri" style="width:100%">+ Tambah tagihan</button><p class="note">Contoh tagihan lain: uang buku, seragam, ujian, study tour, daftar ulang tahunan, jemputan.</p>`;
+ $('#v-tag').innerHTML=h;
+ $('#pv').onclick=()=>{M--;if(M<0){M=11;Y--}renderTag()};
+ $('#nx').onclick=()=>{M++;if(M>11){M=0;Y++}renderTag()};
+ $('#add').onclick=()=>editItem();$('#mt1').onclick=matchDlg;
+ const bl=its.filter(i=>!S.paid[pk(i)]);
+ let m=`Assalamualaikum, mau ngingetin tagihan anak bulan ${BL[M]} ${Y} yang belum dibayar:\n`;
+ bl.sort((a,b)=>a.day-b.day).forEach(i=>{const p=payee(i.pay);m+=`\n• ${S.kids[i.kid]} – ${i.name}: ${rp(i.amt)} (jatuh tempo ${fdt(dueOf(i))})\n  ${p.name}${p.rek?` | ${p.bank} ${p.rek} a.n. ${p.an}`:''}${p.va?` | VA ${p.va}`:''}`});
+ m+=`\n\nTotal: ${rp(bel)}\n\nMakasih ya 🙏`;
+ $('#wa').href='https://wa.me/6282323900551?text='+encodeURIComponent(bl.length?m:`Semua tagihan anak bulan ${BL[M]} sudah lunas 🎉`);
+}
+function renderRek(){
+ let h='<p class="sub">Isi sekali, dipakai terus. QRIS: upload foto/screenshot.</p>';
+ S.payees.forEach(p=>{h+=`<div class="card"><div class="row sp"><b>${esc(p.name)}</b><button class="sm" data-pe="${p.id}">Edit</button></div><div class="det">${payInfo(p)}</div></div>`});
+ h+='<button id="addp" class="pri" style="width:100%">+ Tambah penerima</button>';
+ $('#v-rek').innerHTML=h;$('#addp').onclick=()=>editPayee();
+}
+function gcal(title,det,day,off){
+ const d=new Date(now.getFullYear(),now.getMonth(),day-off,8);
+ if(d<new Date(now.getFullYear(),now.getMonth(),now.getDate()))d.setMonth(d.getMonth()+1);
+ const f=x=>x.getFullYear()+String(x.getMonth()+1).padStart(2,'0')+String(x.getDate()).padStart(2,'0')+'T'+String(x.getHours()).padStart(2,'0')+String(x.getMinutes()).padStart(2,'0')+'00';
+ const e=new Date(d.getTime()+30*6e4);
+ return 'https://calendar.google.com/calendar/render?action=TEMPLATE&text='+encodeURIComponent(title)+'&details='+encodeURIComponent(det)+'&dates='+f(d)+'/'+f(e)+'&recur='+encodeURIComponent('RRULE:FREQ=MONTHLY')+'&ctz=Asia%2FJakarta'}
+function renderIng(){
+ const days=[...new Set(S.items.map(i=>Math.min(i.day,28)))].sort((a,b)=>a-b);
+ let h=`<p class="sub">Satu klik, jadi pengingat berulang tiap bulan di Google Calendar HP. Suami buka halaman ini dan tekan semua tombolnya sekali saja.</p>`;
+ days.forEach(d=>{
+  const l=S.items.filter(i=>Math.min(i.day,28)===d);
+  const det=l.map(i=>`${S.kids[i.kid]} ${i.name} ${rp(i.amt)} → ${payee(i.pay).name}`).join('\n');
+  const tot=l.reduce((s,i)=>s+ +i.amt,0);
+  h+=`<div class="card"><b>Tanggal ${d}</b> <span class="mu">· ${rp(tot)}</span><div class="mu" style="margin:4px 0 10px">${l.map(i=>esc(S.kids[i.kid]+' '+i.name)).join(', ')}</div>
+  <div class="row"><a class="btn sm grow" style="text-align:center" target="_blank" rel="noopener" href="${gcal('H-2: siapkan bayar tagihan anak (tgl '+d+')',det,d,2)}">Pengingat H-2</a><a class="btn sm pri grow" style="text-align:center" target="_blank" rel="noopener" href="${gcal('BAYAR hari ini: tagihan anak',det,d,0)}">Pengingat hari H</a></div></div>`});
+ h+=`<div class="card"><b>Bagikan aplikasi ini</b><p class="note" style="margin:4px 0 0">Kirim link halaman ini ke WA suami. Mau berupa QR? Tempel link-nya di pembuat QR gratis mana pun. Catatan: status lunas tersimpan di HP masing-masing, jadi gunakan tombol “Kirim tagihan ke WA suami” di tab Tagihan untuk update.</p></div>`;
+ $('#v-ing').innerHTML=h;
+}
+const dlg=$('#dlg');
+function editItem(id){
+ const i=id?S.items.find(x=>x.id===id):{kid:0,name:'',amt:'',day:10,pay:S.payees[0].id};
+ dlg.innerHTML=`<b>${id?'Edit':'Tambah'} tagihan</b>
+<label>Anak</label><select id="f-k">${S.kids.map((k,x)=>`<option value="${x}" ${x===i.kid?'selected':''}>${esc(k)}</option>`).join('')}</select>
+<label>Nama tagihan</label><input id="f-n" value="${esc(i.name)}">
+<label>Nominal (Rp)</label><input id="f-a" type="number" inputmode="numeric" value="${i.amt}">
+<label>Tanggal jatuh tempo tiap bulan</label><input id="f-d" type="number" min="1" max="31" value="${i.day}">
+<label>Dibayar ke</label><select id="f-p">${S.payees.map(p=>`<option value="${p.id}" ${p.id===i.pay?'selected':''}>${esc(p.name)}</option>`).join('')}</select>
+<div class="row" style="margin-top:16px"><button class="pri grow" id="ok">Simpan</button><button id="cl">Batal</button>${id?'<button id="dl" style="color:var(--er)">Hapus</button>':''}</div>`;
+ dlg.showModal();
+ $('#cl').onclick=()=>dlg.close();
+ if(id)$('#dl').onclick=()=>{S.items=S.items.filter(x=>x.id!==id);save();dlg.close();all()};
+ $('#ok').onclick=()=>{const o={id:id||'i'+Date.now(),kid:+$('#f-k').value,name:$('#f-n').value||'Tagihan',amt:+$('#f-a').value||0,day:Math.max(1,Math.min(31,+$('#f-d').value||10)),pay:$('#f-p').value};
+  if(id)Object.assign(i,o);else S.items.push(o);save();dlg.close();all()}}
+function editPayee(id){
+ const p=id?S.payees.find(x=>x.id===id):{name:'',bank:'',rek:'',an:'',va:'',wa:'',qris:''};
+ const f=(k,l,t)=>`<label>${l}</label><input id="p-${k}" ${t||''} value="${esc(p[k])}">`;
+ dlg.innerHTML=`<b>${id?'Edit':'Tambah'} penerima</b>${f('name','Nama (sekolah / guru / coach)')}${f('bank','Bank')}${f('rek','No. rekening','inputmode="numeric"')}${f('an','Atas nama')}${f('va','No. VA (kalau ada)','inputmode="numeric"')}${f('wa','No. WA','inputmode="tel"')}
+<label>Foto QRIS</label><input id="p-q" type="file" accept="image/*">${p.qris?'<div class="note">QRIS tersimpan. Pilih file baru untuk mengganti.</div>':''}
+<div class="row" style="margin-top:16px"><button class="pri grow" id="ok">Simpan</button><button id="cl">Batal</button></div>`;
+ dlg.showModal();$('#cl').onclick=()=>dlg.close();
+ $('#ok').onclick=async()=>{const o={};['name','bank','rek','an','va','wa'].forEach(k=>o[k]=$('#p-'+k).value.trim());
+  o.qris=p.qris;const fl=$('#p-q').files[0];
+  if(fl)try{o.qris=await shrink(fl)}catch(e){}
+  if(id)Object.assign(p,o);else S.payees.push(Object.assign({id:'p'+Date.now()},o));
+  save();dlg.close();all()}}
+function shrink(file){return new Promise((res,rej)=>{const im=new Image();im.onload=()=>{const s=Math.min(1,700/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=im.width*s;c.height=im.height*s;c.getContext('2d').drawImage(im,0,0,c.width,c.height);res(c.toDataURL('image/jpeg',.85))};im.onerror=rej;im.src=URL.createObjectURL(file)})}
+const fd=s=>new Date(s+'T00:00:00').toLocaleDateString('id-ID',{day:'numeric',month:'long',year:'numeric'});
+function onceSt(o){if(o.paid)return['Lunas','c-ok'];if(!o.due)return['Belum',''];const t=new Date(now.getFullYear(),now.getMonth(),now.getDate());const d=Math.round((new Date(o.due+'T00:00:00')-t)/864e5);if(d<0)return['Terlambat '+(-d)+' hari','c-er'];if(d===0)return['Hari ini!','c-er'];if(d<=7)return['H-'+d,'c-wa'];return['Belum','']}
+function onceCal(o){const d=new Date(o.due+'T08:00:00');d.setDate(d.getDate()-2);const f=x=>x.getFullYear()+String(x.getMonth()+1).padStart(2,'0')+String(x.getDate()).padStart(2,'0')+'T080000';const e=new Date(d.getTime());e.setMinutes(30);const g=x=>f(x).slice(0,11)+String(x.getMinutes()).padStart(2,'0')+'00';return 'https://calendar.google.com/calendar/render?action=TEMPLATE&text='+encodeURIComponent('H-2 bayar: '+S.kids[o.kid]+' '+o.name+' '+rp(o.amt))+'&details='+encodeURIComponent('Maks '+fd(o.due)+' → '+payee(o.pay).name)+'&dates='+f(d)+'/'+g(e)+'&ctz=Asia%2FJakarta'}
+function renderOne(){
+ const L=S.once;let bel=0,lun=0;L.forEach(o=>o.paid?lun+=+o.amt:bel+=+o.amt);
+ let h=`<p class="sub">Tagihan sekali bayar: sumbangan, eskul tahunan, study tour, dll.</p><div class="sum"><div class="s1"><small>Belum dibayar</small><strong>${rp(bel)}</strong></div><div class="s2"><small>Sudah lunas</small><strong>${rp(lun)}</strong></div></div><a class="btn pri" id="wa2" target="_blank" rel="noopener" style="display:block;text-align:center;margin-bottom:6px">Kirim ke WA suami</a>`;
+ S.kids.forEach((k,ki)=>{const l=L.filter(o=>o.kid===ki).sort((a,b)=>(a.due||'9')>(b.due||'9')?1:-1);if(!l.length)return;
+  h+=`<div class="kid">${esc(k)}</div><div class="card" style="padding:4px 14px">`;
+  l.forEach(o=>{const [st,cl]=onceSt(o),p=payee(o.pay);
+   h+=`<div class="it"><div class="row sp"><div class="grow"><div class="nm">${esc(o.name)}</div><div class="mu">${esc(p.name)} · ${o.due?'maks '+fd(o.due):'tanpa batas'}${o.paid?' · dibayar '+esc(o.paid):''}</div></div><div class="right"><div class="nm">${rp(o.amt)}</div><span class="chip ${cl}">${st}</span></div></div>
+   <div class="row" style="margin-top:8px;flex-wrap:wrap"><button class="sm ${o.paid?'':'pri'}" data-op="${o.id}">${o.paid?'Batalkan lunas':'Tandai lunas'}</button><button class="sm" data-oi="${o.id}">Cara bayar</button><button class="sm" data-oe="${o.id}">Edit</button>${o.due&&!o.paid?`<a class="btn sm" target="_blank" rel="noopener" href="${onceCal(o)}">Ingatkan H-2</a>`:''}</div>
+   ${open['o'+o.id]?`<div class="det">${payInfo(p,p.id==='kor'?'':`Assalamualaikum Bu/Pak, mau konfirmasi ya, ${o.name} ${S.kids[o.kid]} sebesar ${rp(o.amt)} sudah ditransfer. Mohon dicek ya 🙏 Terima kasih.`)}</div>`:''}</div>`});
+  h+='</div>'});
+ h+='<button id="addo" class="pri" style="width:100%;margin-top:12px">+ Tambah tagihan sekali bayar</button>';
+ $('#v-one').innerHTML=h;$('#addo').onclick=()=>editOne();
+ const bl=L.filter(o=>!o.paid);let m='Assalamualaikum, mau ngingetin tagihan sekali bayar yang belum dibayar:\n';
+ bl.forEach(o=>{const p=payee(o.pay);m+=`\n• ${S.kids[o.kid]} – ${o.name}: ${rp(o.amt)}${o.due?' (maks '+fd(o.due)+')':''}\n  ${p.id==='kor'?'Bayar cash ke korlas':p.name+(p.rek?' | '+p.bank+' '+p.rek+' a.n. '+p.an:'')}`});
+ m+='\n\nTotal: '+rp(bel)+'\n\nMakasih ya 🙏';
+ $('#wa2').href='https://wa.me/6282323900551?text='+encodeURIComponent(bl.length?m:'Semua tagihan sekali bayar sudah lunas 🎉');
+}
+function editOne(id){
+ const o=id?S.once.find(x=>x.id===id):{kid:0,name:'',amt:'',due:'',pay:S.payees[0].id};
+ dlg.innerHTML=`<b>${id?'Edit':'Tambah'} tagihan sekali bayar</b>
+<label>Anak</label><select id="f-k">${id?'':'<option value="all">Semua anak</option>'}${S.kids.map((k,x)=>`<option value="${x}" ${id&&x===o.kid?'selected':''}>${esc(k)}</option>`).join('')}</select>
+<label>Nama tagihan</label><input id="f-n" value="${esc(o.name)}">
+<label>Nominal per anak (Rp)</label><input id="f-a" type="number" inputmode="numeric" value="${o.amt}">
+<label>Batas bayar (kosongkan kalau tidak ada)</label><input id="f-d" type="date" value="${o.due||''}">
+<label>Dibayar ke</label><select id="f-p">${S.payees.map(p=>`<option value="${p.id}" ${p.id===o.pay?'selected':''}>${esc(p.name)}</option>`).join('')}</select>
+<div class="row" style="margin-top:16px"><button class="pri grow" id="ok">Simpan</button><button id="cl">Batal</button>${id?'<button id="dl" style="color:var(--er)">Hapus</button>':''}</div>`;
+ dlg.showModal();$('#cl').onclick=()=>dlg.close();
+ if(id)$('#dl').onclick=()=>{S.once=S.once.filter(x=>x.id!==id);save();dlg.close();all()};
+ $('#ok').onclick=()=>{const v={name:$('#f-n').value||'Tagihan',amt:+$('#f-a').value||0,due:$('#f-d').value,pay:$('#f-p').value},kv=$('#f-k').value;
+  if(id)Object.assign(o,v,{kid:+kv});else(kv==='all'?S.kids.map((_,x)=>x):[+kv]).forEach((x,n)=>S.once.push(Object.assign({id:'o'+Date.now()+n,kid:x,paid:''},v)));
+  save();dlg.close();all()}}
+function matchDlg(){
+ dlg.innerHTML=`<b>Lunaskan dari bukti transfer</b><p class="note">Tempel teks notifikasi m-banking, SMS, atau e-receipt (boleh beberapa sekaligus). Nominalnya dicocokkan dengan tagihan yang belum lunas, untuk bulan ${BL[M]} ${Y} dan tagihan sekali bayar.</p><textarea id="mt" rows="5" style="width:100%;font:inherit;padding:10px;border-radius:12px;border:1px solid var(--ln);background:var(--card);color:var(--tx)"></textarea><div id="mr"></div><div class="row" style="margin-top:14px"><button class="pri grow" id="go">Cari tagihan</button><button id="cl">Tutup</button></div>`;
+ dlg.showModal();$('#cl').onclick=()=>dlg.close();
+ $('#go').onclick=()=>{
+  const cnt={};($('#mt').value.match(/\d{1,3}(?:[.,]\d{3})+|\d{4,}/g)||[]).forEach(s=>{const v=+s.replace(/[.,]/g,'');if(v>=1000)cnt[v]=(cnt[v]||0)+1});
+  const c=[];S.items.forEach(i=>{if(!S.paid[pk(i)]&&cnt[i.amt])c.push({k:'m:'+i.id,a:+i.amt,t:S.kids[i.kid]+' – '+i.name,s:payee(i.pay).name})});
+  S.once.forEach(o=>{if(!o.paid&&cnt[o.amt])c.push({k:'o:'+o.id,a:+o.amt,t:S.kids[o.kid]+' – '+o.name,s:payee(o.pay).name})});
+  const by={};c.forEach(x=>by[x.a]=(by[x.a]||0)+1);
+  if(!c.length){$('#mr').innerHTML='<p class="note">Tidak ada nominal yang cocok dengan tagihan belum lunas.</p>';return}
+  $('#mr').innerHTML='<p class="note">Centang yang benar. Yang nominalnya sama persis dengan beberapa tagihan dibiarkan kosong, pilih sendiri.</p>'+c.map(x=>`<label style="display:flex;gap:10px;align-items:flex-start;color:var(--tx);font-size:15px"><input type="checkbox" style="width:auto;margin-top:6px" data-c="${x.k}" ${by[x.a]<=cnt[x.a]?'checked':''}><span>${esc(x.t)}<br><span class="mu">${rp(x.a)} · ${esc(x.s)}</span></span></label>`).join('')+'<button class="pri" id="ap" style="width:100%;margin-top:12px">Tandai lunas yang dipilih</button>';
+  $('#ap').onclick=()=>{let n=0;dlg.querySelectorAll('[data-c]:checked').forEach(b=>{const [t,id]=b.dataset.c.split(':');if(t==='m')S.paid[`${Y}-${M}:${id}`]=fdt(new Date());else{const o=S.once.find(x=>x.id===id);if(o)o.paid=fdt(new Date())}n++});save();dlg.close();all();toast(n+' tagihan dilunasi')}}}
+let RY=new Date().getFullYear();
+function renderRekap(){
+ const cur=now.getFullYear()*12+now.getMonth(),td=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+'-'+String(now.getDate()).padStart(2,'0'),kp=[0,0,0];let lun=0,arr=0,rows='';
+ for(let m=0;m<12;m++){const idx=RY*12+m;let tot=0,pd=0,n=0,np=0;
+  S.items.forEach(i=>{n++;tot+=+i.amt;if(S.paid[`${RY}-${m}:${i.id}`]){np++;pd+=+i.amt;kp[i.kid]+=+i.amt}else if(idx>=S.start&&(idx<cur||(idx===cur&&i.day<now.getDate())))arr+=+i.amt});
+  if(idx>=S.start)lun+=pd;
+  let st,cl='';if(idx<S.start)st='Sebelum dipakai';else if(np===n){st='Lengkap';cl='c-ok'}else if(idx>cur)st='Belum jatuh tempo';else if(idx===cur){st='Berjalan';cl='c-wa'}else{st='Ada tunggakan';cl='c-er'}
+  rows+=`<div class="it"><button data-rm="${m}" style="width:100%;text-align:left;border:0;background:none;padding:0"><div class="row sp"><div><div class="nm">${BL[m]}</div><div class="mu">${idx<S.start?'–':np+' dari '+n+' lunas · '+rp(pd)+' dari '+rp(tot)}</div></div><span class="chip ${cl}">${st}</span></div></button></div>`}
+ const oy=S.once.filter(o=>!o.due||o.due.slice(0,4)==RY);
+ oy.forEach(o=>{if(o.paid){lun+=+o.amt;kp[o.kid]+=+o.amt}else if(o.due&&o.due<td)arr+=+o.amt});
+ let h=`<div class="mon"><button class="sm" id="ry1">‹</button><b>Rekap ${RY}</b><button class="sm" id="ry2">›</button></div><div class="sum"><div class="s2"><small>Sudah dibayar</small><strong>${rp(lun)}</strong></div><div class="s1"><small>Tunggakan</small><strong>${rp(arr)}</strong></div></div>`;
+ h+=`<div class="kid">Per bulan (ketuk untuk buka)</div><div class="card" style="padding:4px 14px">${rows}</div>`;
+ h+=`<div class="kid">Total dibayar per anak</div><div class="card">${S.kids.map((k,x)=>`<div class="row sp"><span>${esc(k)}</span><b>${rp(kp[x])}</b></div>`).join('')}</div>`;
+ if(oy.length)h+=`<div class="kid">Sekali bayar</div><div class="card" style="padding:4px 14px">${oy.map(o=>{const [st,cl]=onceSt(o);return `<div class="it"><div class="row sp"><div class="grow"><div class="nm">${esc(o.name)}</div><div class="mu">${esc(S.kids[o.kid])}${o.due?' · maks '+fd(o.due):''}${o.paid?' · dibayar '+esc(o.paid):''}</div></div><div class="right"><div class="nm">${rp(o.amt)}</div><span class="chip ${cl}">${st}</span></div></div></div>`}).join('')}</div>`;
+ h+='<p class="note">Rekap memakai nominal tagihan saat ini. Bulan sebelum aplikasi dipakai tidak dihitung sebagai tunggakan.</p>';
+ $('#v-rkp').innerHTML=h;$('#ry1').onclick=()=>{RY--;renderRekap()};$('#ry2').onclick=()=>{RY++;renderRekap()};
+}
+function all(){renderTag();renderRekap();renderOne();renderRek();renderIng()}
+document.addEventListener('click',e=>{
+ const t=e.target.closest('button');if(!t)return;
+ if(t.dataset.pay){const i=S.items.find(x=>x.id===t.dataset.pay),k=pk(i);if(S.paid[k])delete S.paid[k];else S.paid[k]=new Date().toLocaleDateString('id-ID',{day:'numeric',month:'long',year:'numeric'});save();renderTag()}
+ else if(t.dataset.inf){open[t.dataset.inf]=!open[t.dataset.inf];renderTag()}
+ else if(t.dataset.ed)editItem(t.dataset.ed);
+ else if(t.dataset.op){const o=S.once.find(x=>x.id===t.dataset.op);o.paid=o.paid?'':new Date().toLocaleDateString('id-ID',{day:'numeric',month:'long',year:'numeric'});save();renderOne()}
+ else if(t.dataset.oi){open['o'+t.dataset.oi]=!open['o'+t.dataset.oi];renderOne()}
+ else if(t.dataset.oe)editOne(t.dataset.oe);
+ else if(t.dataset.pe)editPayee(t.dataset.pe);
+ else if(t.dataset.cp)copy(t.dataset.cp);
+ else if(t.dataset.rm){Y=RY;M=+t.dataset.rm;renderTag();document.querySelector('nav button[data-t="tag"]').click()}
+ else if(t.dataset.t){document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',b===t));['tag','one','rkp','rek','ing'].forEach(v=>$('#v-'+v).classList.toggle('hide',v!==t.dataset.t));window.scrollTo(0,0)}});
+all();
+</script>
+</body>
+</html>
